@@ -1,4 +1,6 @@
-<?php namespace ComBank\Transactions;
+<?php
+
+namespace ComBank\Transactions;
 
 /**
  * Created by VS Code.
@@ -11,8 +13,21 @@ use ComBank\Bank\Contracts\BankAccountInterface;
 use ComBank\Exceptions\InvalidOverdraftFundsException;
 use ComBank\Transactions\Contracts\BankTransactionInterface;
 
-class WithdrawTransaction 
+class WithdrawTransaction extends BaseTransaction
 {
+    public function applyTransaction(BankAccountInterface $bankAccount): float
+    {
+        $newBalance = $bankAccount->getBalance() - $this->getAmount();
 
+        if (!$bankAccount->getOverdraft()->isGrantOverdraftFunds($newBalance)) {
+            throw new InvalidOverdraftFundsException('Your withdraw has reach the max overdraft funds.');
+        }
    
+        return $newBalance;
+    }
+
+    public function getTransactionInfo(): string
+    {
+        return "WITHDRAW_TRANSACTION";
+    }
 }

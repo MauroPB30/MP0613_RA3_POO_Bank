@@ -24,43 +24,57 @@ class BankAccount implements BankAccountInterface
 {
     private $balance;
     private $status;
+    private $overdraft;
 
     public function __construct($balance)
     {
         $this->balance = $balance;
-        $this->status=true;
+        $this->status = true;
+        $this->overdraft = new NoOverdraft();
     }
-
-    public function getBalance()
+    public function getBalance(): float
     {
         return $this->balance;
     }
-
-    public function closeAccount(): void{
+    public function closeAccount(): void
+    {
         $this->status = false;
     }
-
-    public function reopenAccount(): void{
-        $this->status=true;
+    public function reopenAccount(): void
+    {
+        if ($this->isOpen()) {
+            throw new BankAccountException("Cannot reopen: Account is already open.");
+        }
+        $this->status = true;
     }
-
-    public function isOpen(): bool{
+    public function isOpen(): bool
+    {
         return $this->status;
     }
-
-    public function setBalance(float $balance): void{
+    public function setBalance(float $balance): void
+    {
         $this->balance = $balance;
     }
-
     public function transaction(BankTransactionInterface $transaction): void
     {
         if (!$this->isOpen()) {
             throw new BankAccountException("Cannot perform transaction: Account is closed.");
         }
-
+        try{
         $newBalance = $transaction->applyTransaction($this);
         $this->setBalance($newBalance);
+    } catch (\ComBank\Exceptions\InvalidOverdraftFundsException $e) {
+            throw new \ComBank\Exceptions\FailedTransactionException($e->getMessage());
+        }
     }
 
-
+    public function getOverdraft(): OverdraftInterface
+    {
+        return $this->overdraft;
+    }
+    public function applyOverdraft(OverdraftInterface $overdraft): void
+    {
+        $this->overdraft = $overdraft;
+    }
 }
+
