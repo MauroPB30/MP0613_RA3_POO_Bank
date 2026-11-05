@@ -14,6 +14,8 @@ use ComBank\Transactions\WithdrawTransaction;
 use ComBank\Exceptions\BankAccountException;
 use ComBank\Exceptions\FailedTransactionException;
 use ComBank\Exceptions\ZeroAmountException;
+use ComBank\OverdraftStrategy\GoldOverdraft;
+use ComBank\Transactions\InterestTransaction;
 
 require_once 'bootstrap.php';
 
@@ -128,3 +130,38 @@ try {
 } catch (BankAccountException $e) {
     pl("Result: Account creation rejected due to an " . strtolower($e->getMessage()) . ".");
 }
+pl(""); 
+
+echo "<h3>--------- [Start testing Interest Transaction - Issue #3] --------</h3>";
+// Sample 1: NoOverdraft (1% interest)
+$accountSample1 = new BankAccount(1000.0);
+pl("Sample 1:");
+pl("Account Balance: $" . number_format($accountSample1->getBalance(), 2));
+pl("Overdraft Strategy: NoOverdraft");
+pl("Interest Rate: " . $accountSample1->getOverdraft()->getInterestRate() . "%");
+$accountSample1->transaction(new InterestTransaction());
+pl("Balance After Transaction: $" . number_format($accountSample1->getBalance(), 2));
+
+pl("");
+
+// Sample 2: SilverOverdraft (5% interest)
+$accountSample2 = new BankAccount(1000.0);
+$accountSample2->applyOverdraft(new SilverOverdraft());
+pl("Sample 2:");
+pl("Account Balance: $" . number_format($accountSample2->getBalance(), 2));
+pl("Overdraft Strategy: SilverOverdraft");
+pl("Interest Rate: " . $accountSample2->getOverdraft()->getInterestRate() . "%");
+$accountSample2->transaction(new InterestTransaction());
+pl("Balance After Transaction: $" . number_format($accountSample2->getBalance(), 2));
+
+pl("");
+
+// Sample 3: GoldOverdraft (10% interest)
+$accountSample3 = new BankAccount(1000.0);
+$accountSample3->applyOverdraft(new GoldOverdraft());
+pl("Sample 3:");
+pl("Account Balance: $" . number_format($accountSample3->getBalance(), 2));
+pl("Overdraft Strategy: GoldOverdraft");
+pl("Interest Rate: " . $accountSample3->getOverdraft()->getInterestRate() . "%");
+$accountSample3->transaction(new InterestTransaction());
+pl("Balance After Transaction: $" . number_format($accountSample3->getBalance(), 2));
