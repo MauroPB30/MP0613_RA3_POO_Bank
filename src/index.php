@@ -106,3 +106,25 @@ try {
 }
 
 //---[Bank account 3]---/
+echo "<h3>--- Testing Email Validation (Issue #2) ---</h3>";
+
+// Sample 1: Email válido
+try {
+    $bankAccount3 = new BankAccount(500.0, "john.smith@example.com");
+    pl("Sample 1:");
+    pl("Email: " . $bankAccount3->getEmail());
+    pl("Result: Account created successfully.");
+} catch (BankAccountException $e) {
+    pl("Result: Account creation rejected due to an " . strtolower($e->getMessage()) . ".");
+}
+
+pl(""); 
+// Sample 2: Intentar crear bankAccount3 con email inválido
+try {
+    pl("Sample 2:");
+    pl("Email: johnexample.com");
+    $bankAccount3Invalid = new BankAccount(500.0, "johnexample.com");
+    pl("Result: Account created successfully.");
+} catch (BankAccountException $e) {
+    pl("Result: Account creation rejected due to an " . strtolower($e->getMessage()) . ".");
+}
